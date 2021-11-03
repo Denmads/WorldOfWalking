@@ -2,14 +2,14 @@ package com.madsj.response;
 
 public class ErrorResponse implements Response{
 
-    private final String message;
+    private final Exception error;
 
-    public ErrorResponse(String message) {
-        this.message = message;
+    public ErrorResponse(Exception error) {
+        this.error = error;
     }
 
     @Override
-    public String print() {
-        return message;
+    public void print() {
+        System.out.println(error.getMessage());
     }
 }

@@ -9,9 +9,10 @@ import java.util.*;
 /**
  * Possible commands
  *
+ * HELP
  * LIST <"Commands"/"Zones"/"Exits"/"Items">    //Items (in room)
  * GOTO <Zone/Room>
- * INSPECT <"Room"/"Zone"/"Backpack"/Item>
+ * INSPECT <"Room"/"Zone"/Storage>
  * USE <Item>    //from backpack
  * USE <Item> ON <Object>    //from backpack
  * QUIT
@@ -21,9 +22,10 @@ public class Input {
     private Input() {}
 
     private static final Scanner userInput = new Scanner(System.in);
-
+    private static final String inputChar = ">";
 
     public static Command nextCommand() throws UnknownCommandException, WrongNumberOfArgumentsException, MalformedCommandException {
+        System.out.print(inputChar + " ");
         String rawTxt = userInput.nextLine();
         String[] tokens = rawTxt.split(" ");
         return parseCommand(tokens);
@@ -38,8 +40,9 @@ public class Input {
                 return parseDefault(operator, tokens);
             case "use":
                 return parseUse(operator, tokens);
+            case "help":
             case "quit":
-                return new Command("quit");
+                return new Command(operator);
         }
         throw new UnknownCommandException(operator);
     }
