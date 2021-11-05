@@ -34,21 +34,24 @@ public class Input {
     private static Command parseCommand(String[] tokens) throws UnknownCommandException, WrongNumberOfArgumentsException, MalformedCommandException {
         String operator = tokens[0].toLowerCase();
         switch (operator) {
-            case "list":
-            case "goto":
-            case "inspect":
+            case Command.LIST:
+            case Command.GOTO:
+            case Command.INSPECT:
                 return parseDefault(operator, tokens);
-            case "use":
+            case Command.USE:
                 return parseUse(operator, tokens);
-            case "help":
-            case "quit":
+            case Command.HELP:
+            case Command.QUIT:
                 return new Command(operator);
         }
         throw new UnknownCommandException(operator);
     }
 
 
-    private static Command parseDefault(String operator, String[] tokens) {
+    private static Command parseDefault(String operator, String[] tokens) throws MalformedCommandException {
+        if (tokens.length <= 1) {
+            throw new MalformedCommandException(operator, "Arguments", "None");
+        }
 
         String[] arguments = Arrays.copyOfRange(tokens, 1, tokens.length);
         return new Command(operator, Arrays.asList(arguments));

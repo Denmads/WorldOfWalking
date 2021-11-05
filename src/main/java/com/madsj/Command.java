@@ -4,6 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Command {
+
+    public static final String HELP = "help";
+    public static final String LIST = "list";
+    public static final String GOTO = "goto";
+    public static final String INSPECT = "inspect";
+    public static final String USE = "use";
+    public static final String QUIT = "quit";
+
     private final String operation;
     private final List<String> arguments;
     private final String modifier;

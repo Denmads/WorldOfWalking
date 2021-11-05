@@ -2,25 +2,28 @@ package com.madsj.response;
 
 import com.madsj.ItemStorage;
 import com.madsj.item.description.ItemDescription;
+import com.madsj.item.instance.StorageItemInstance;
 
 import java.util.Map;
 
 public class DescribeStorageResponse implements Response {
 
-    private final String name;
-    private final ItemStorage storage;
+    private final StorageItemInstance storage;
 
-    public DescribeStorageResponse(String storageName, ItemStorage storage) {
+    public DescribeStorageResponse(StorageItemInstance storage) {
         this.storage = storage;
-        this.name = storageName;
     }
 
     @Override
     public void print() {
-        System.out.println("The " + name + " contains the following:");
-        for (Map.Entry<ItemDescription, Integer> row : storage) {
-            ItemDescription type = storage.getLevel().getItemDB().getById(row.getKey().getId());
-            System.out.println("\t" + type.getName() + " - " + row.getValue());
+        if (storage.getItemStorage().itemCount() == 0) {
+            System.out.println("The " + storage.getType().getName() + " does not contain any items!");
+        }
+        else {
+            System.out.println("The " + storage.getType().getName() + " contains the following:");
+            for (Map.Entry<ItemDescription, Integer> row : storage.getItemStorage().getItemTypeCounts().entrySet()) {
+                System.out.println("\t" + row.getKey().getName() + " - " + row.getValue());
+            }
         }
     }
 }

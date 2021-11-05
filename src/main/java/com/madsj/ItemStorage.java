@@ -7,8 +7,10 @@ import com.madsj.item.description.ItemDescription;
 import com.madsj.item.instance.ItemInstance;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-public class ItemStorage implements Iterable<Map.Entry<ItemDescription, Integer>> {
+public class ItemStorage {
     private List<ItemInstance> items = new ArrayList<>();
     private int limit; //-1 for infinite
 
@@ -32,6 +34,15 @@ public class ItemStorage implements Iterable<Map.Entry<ItemDescription, Integer>
         return numItems;
     }
 
+    public List<ItemDescription> getStoredItemTypes() {
+        return items.stream().map(new Function<ItemInstance, ItemDescription>() {
+            @Override
+            public ItemDescription apply(ItemInstance itemInstance) {
+                return itemInstance.getType();
+            }
+        }).distinct().collect(Collectors.toList());
+    }
+
     public int freeSpace() {
         return itemCount() - (limited() ? limit : Integer.MAX_VALUE);
     }
@@ -45,43 +56,67 @@ public class ItemStorage implements Iterable<Map.Entry<ItemDescription, Integer>
     }
 
     public void addItem(ItemInstance item) throws NotEnoughSpaceInStorageException {
-        if (freeSpace() < amount) {
-            throw new NotEnoughSpaceInStorageException(freeSpace(), amount);
+        if (freeSpace() == 0) {
+            throw new NotEnoughSpaceInStorageException(freeSpace(), 1);
         }
 
-        if (items.containsKey(type)) {
-            items.replace(type, items.get(type) + amount);
-        }
-        else {
-            items.put(type, amount);
-        }
+        items.add(item);
     }
 
-    public void addItems(List<ItemInstance> items) {
-        
-    }
-
-    public void removeItem(ItemDescription type, int amount) throws ItemNotInStorageException, TooFewItemsInStorageException {
-        if (!items.containsKey(type)) {
-            throw new ItemNotInStorageException(type);
-        }
-        else if (items.get(type) < amount) {
-            throw new TooFewItemsInStorageException(type, amount, items.get(type));
+    public void addItems(List<ItemInstance> items) throws NotEnoughSpaceInStorageException {
+        if (freeSpace() < items.size()) {
+            throw new NotEnoughSpaceInStorageException(freeSpace(), items.size());
         }
 
-        items.replace(type, items.get(type) - amount);
-        if (items.get(type) == 0) {
-            items.remove(type);
+        this.items.addAll(items);
+    }
+
+    //Removes a specific item from the storage
+    public void removeItem(ItemInstance item) throws ItemNotInStorageException {
+        if (!items.contains(item)) {
+            throw new ItemNotInStorageException(item.getType());
         }
+
+        items.remove(item);
     }
 
-    public void transferItemTo(ItemStorage other, ItemDescription type, int amount) throws ItemNotInStorageException, TooFewItemsInStorageException, NotEnoughSpaceInStorageException {
-        removeItem(type, amount);
-        other.addItem(type, amount);
+    //Removes the first 'amount' of the given item type. Returns the removed items
+    public List<ItemInstance> removeItems(ItemDescription type, int amount) throws TooFewItemsInStorageException {
+        if (itemCount(type) < amount) {
+            throw new TooFewItemsInStorageException(type, amount, itemCount(type));
+        }
+
+        int index = items.size()-1;
+        List<ItemInstance> removed = new ArrayList<>();
+        while (amount > 0) {
+            ItemInstance item = items.get(index);
+            if (item.getType() == type) {
+                items.remove(item);
+                removed.add(item);
+                amount--;
+            }
+
+            index--;
+        }
+        return removed;
     }
 
-    @Override
-    public Iterator<Map.Entry<ItemDescription, Integer>> iterator() {
-        return items.entrySet().iterator();
+    public void transferItemTo(ItemStorage other, ItemInstance item) throws ItemNotInStorageException, NotEnoughSpaceInStorageException {
+        removeItem(item);
+        other.addItem(item);
+    }
+
+    public void transferItemsTo(ItemStorage other, ItemDescription type, int amount) throws TooFewItemsInStorageException, NotEnoughSpaceInStorageException {
+        List<ItemInstance> removed = removeItems(type, amount);
+        other.addItems(removed);
+    }
+
+    public Map<ItemDescription, Integer> getItemTypeCounts() {
+        List<ItemDescription> types = getStoredItemTypes();
+        Map<ItemDescription, Integer> counts = new HashMap<>();
+        for (ItemDescription type : types) {
+            counts.put(type, itemCount(type));
+        }
+        return counts;
     }
 }

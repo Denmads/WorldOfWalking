@@ -4,7 +4,10 @@ import com.madsj.exception.MalformedCommandException;
 import com.madsj.exception.UnknownCommandException;
 import com.madsj.exception.WrongNumberOfArgumentsException;
 import com.madsj.item.description.StorageItemDescription;
+import com.madsj.item.instance.ItemInstance;
+import com.madsj.item.instance.StorageItemInstance;
 import com.madsj.response.CommandListResponse;
+import com.madsj.response.DescribeStorageResponse;
 import com.madsj.response.ErrorResponse;
 import com.madsj.response.Response;
 
@@ -15,6 +18,8 @@ public class Level {
 
     public void setup() {
         LevelObjects.getItemDB().add(new StorageItemDescription("Chest", 10));
+        StorageItemInstance storage = (StorageItemInstance)LevelObjects.getItemDB().getByName("Chest").createInstance();
+        new DescribeStorageResponse(storage).print();
     }
 
     public void play() {
@@ -31,11 +36,11 @@ public class Level {
                 response.print();
             }
 
-        } while (!lastCommand.getOperation().equals("quit"));
+        } while (!lastCommand.getOperation().equals(Command.QUIT));
     }
 
     private Response processCommand(Command command) {
-        if (command.getOperation().equals("help")) {
+        if (command.getOperation().equals(Command.HELP)) {
             return new CommandListResponse();
         }
         return null;

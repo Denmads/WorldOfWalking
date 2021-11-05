@@ -1,4 +1,4 @@
-package com.madsj;
+package com.madsj.location;
 
 public class ZonedRoom {
 }

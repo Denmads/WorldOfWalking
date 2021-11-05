@@ -1,5 +1,7 @@
 package com.madsj.item.instance;
 
+import com.madsj.ItemStorage;
+import com.madsj.LevelObjects;
 import com.madsj.item.description.ItemDescription;
 
 import java.util.UUID;
@@ -17,7 +19,7 @@ public class StorageItemInstance extends ItemInstance{
         return type;
     }
 
-    public UUID getStorageId() {
-        return storageId;
+    public ItemStorage getItemStorage() {
+        return LevelObjects.getStorageDB().getById(storageId);
     }
 }
